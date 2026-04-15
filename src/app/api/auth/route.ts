@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { sign } from 'jsonwebtoken'
-import { SESSION_COOKIE, verifyPassword } from '@/lib/auth'
-
-const JWT_SECRET = process.env.JWT_SECRET || process.env.ADMIN_PASSWORD || 'kahuyshop-secret-key'
+import { SESSION_COOKIE, verifyPassword, createAdminSession } from '@/lib/auth'
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,12 +10,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Mật khẩu không đúng' }, { status: 401 })
     }
 
-    const token = sign(
-      { role: 'admin' },
-      JWT_SECRET,
-      { expiresIn: '24h' }
-    )
-
+    const token = await createAdminSession()
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000)
 
     const cookieStore = cookies()
